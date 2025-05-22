@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def time_to_seconds(t_str):
     """
@@ -38,21 +39,29 @@ def get_next_bus(t_arrival_stop, bus_schedule):
             return row.to_dict(), wait_time
     return None, float("inf")
 
-# === Testing ===
-test_times = [
-    time_to_seconds("08:00"),  # Should return the first bus after 08:00.
-    time_to_seconds("08:30"),  # Should return the next bus after 08:30.
-    time_to_seconds("08:45"),  # Should return the next bus after 08:45.
-    time_to_seconds("09:00"),  # Should return the next bus after 09:00.
-    time_to_seconds("10:00")   # Rita will be late to meeting.
-]
+# === Simulating Departure Times ===
 
-print("\nTesting get_next_bus function:")
+# Define constants
+MEETING_TIME = time_to_seconds("09:05")
+HOME_TO_BUS_STOP = 300  # 300 seconds = 5 minutes
+BUS_STOP_TO_MEETING = 240  # 240 seconds = 4 minutes
 
-for test_time in test_times:
-    bus, wait_time = get_next_bus(test_time, schedule_df)
+# Simulate Rita leaving home at different times
+departure_times = np.arange(time_to_seconds("07:30"), time_to_seconds("09:00"), 60)  # Every minute
+results = []
+
+for dep_time in departure_times:
+    arrival_at_bus_stop = dep_time + HOME_TO_BUS_STOP
+    bus, wait_time = get_next_bus(arrival_at_bus_stop, schedule_df)
+
     if bus:
-        print(f"At {seconds_to_time(test_time)}, next bus at {seconds_to_time(bus['ZooDepartureSec'])}, "
-              f"waiting {wait_time} sec, arriving at {seconds_to_time(bus['ToomparkArrivalSec'])}")
+        arrival_at_meeting = bus["ToomparkArrivalSec"] + BUS_STOP_TO_MEETING
+        late = arrival_at_meeting > MEETING_TIME
     else:
-        print(f"At {seconds_to_time(test_time)}, Rita is late!")
+        late = True  # No available bus means Rita is late
+
+    results.append({"DepartureTime": seconds_to_time(dep_time), "Late": late})
+
+# Convert results into a DataFrame for analysis
+results_df = pd.DataFrame(results)
+print(results_df)  # Preview the first few rows
