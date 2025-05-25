@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 def time_to_seconds(t_str):
     """
@@ -17,6 +18,7 @@ def seconds_to_time(sec):
     return f"{hour:02d}:{minute:02d}"
 
 # === Read and Process the Bus Schedule ===
+
 schedule_df = pd.read_csv("bus_times.csv", skipinitialspace=True)
 schedule_df["ZooDepartureSec"] = schedule_df["ZooDepartureTime"].apply(time_to_seconds)
 schedule_df["ToomparkArrivalSec"] = schedule_df["ToomparkArrivalTime"].apply(time_to_seconds)
@@ -70,8 +72,35 @@ results_df["Late"] = results_df["Late"].map({True: "Late", False: "Not Late"})
 # Print updated results
 print(results_df)
 
-# === Save results to a CSV file ===
+# === Configure and save results ===
+
 results_df.to_csv("rita_lateness_results.csv", index=False)
 
 print("Results successfully saved to 'rita_lateness_results.csv'")
+
+# Convert "Late" column to numeric values for plotting
+results_df["LateNumeric"] = results_df["Late"].map({"Late": 1, "Not Late": 0})
+
+# Create the figure
+plt.figure(figsize=(10, 5))
+
+# Plot the smooth probability curve
+plt.plot(results_df["DepartureTime"], results_df["LateNumeric"].rolling(5).mean(), linestyle='-', color='red', label="Probability Curve")
+
+# Format x-axis labels to show only every 5 minutes
+tick_positions = results_df.iloc[::5]["DepartureTime"]  # Show every 5th entry
+plt.xticks(tick_positions, rotation=45)
+
+# Formatting the graph
+plt.xlabel("Departure Time")
+plt.ylabel("Probability of Being Late")
+plt.title("Probability of Rita Being Late Depending on Departure Time")
+plt.grid(True)
+plt.legend()
+
+# Save the graph instead of displaying
+plt.savefig("rita_lateness_plot.png")
+print("Plot saved as 'rita_lateness_plot.png'")
+
+
 
