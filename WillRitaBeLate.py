@@ -64,4 +64,14 @@ for dep_time in departure_times:
 
 # Convert results into a DataFrame for analysis
 results_df = pd.DataFrame(results)
-print(results_df)  # Preview the first few rows
+# Modify the results format
+results_df["Late"] = results_df["Late"].map({True: "Late", False: "Not Late"})
+
+# Print updated results
+print(results_df)
+
+# === Save results to a CSV file ===
+results_df.to_csv("rita_lateness_results.csv", index=False)
+
+print("Results successfully saved to 'rita_lateness_results.csv'")
+
