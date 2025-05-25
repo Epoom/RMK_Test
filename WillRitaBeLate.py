@@ -18,7 +18,6 @@ def seconds_to_time(sec):
     return f"{hour:02d}:{minute:02d}"
 
 # === Read and Process the Bus Schedule ===
-
 schedule_df = pd.read_csv("bus_times.csv", skipinitialspace=True)
 schedule_df["ZooDepartureSec"] = schedule_df["ZooDepartureTime"].apply(time_to_seconds)
 schedule_df["ToomparkArrivalSec"] = schedule_df["ToomparkArrivalTime"].apply(time_to_seconds)
@@ -99,8 +98,5 @@ plt.grid(True)
 plt.legend()
 
 # Save the graph instead of displaying
-plt.savefig("rita_lateness_plot.png")
-print("Plot saved as 'rita_lateness_plot.png'")
-
-
-
+plt.savefig("rita_lateness_graph.png")
+print("Plot saved as 'rita_lateness_graph.png'")
